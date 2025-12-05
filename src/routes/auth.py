@@ -170,17 +170,24 @@ async def request_reset_password(
     :return: A message indicating that password reset instructions have been sent.
     :rtype: dict
     """
+    print("DEBUG: request_reset_password function called.")
     user = await repository_users.get_user_by_email(body.email, db)
     if user is None:
+        print(f"DEBUG: User with email {body.email} not found.")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    print(f"DEBUG: User {user.email} found. Triggering password reset email.")
 
-    background_tasks.add_task(
-        send_email,
-        user.email,
-        user.username,
-        str(request.base_url),
-        "reset_password",
-    )
+    # Temporarily mock send_email to get the token for debugging
+    token_reset_password = auth_service.create_email_token({"sub": user.email})
+    print(f"DEBUG: Password reset token for {user.email}: {token_reset_password}")
+
+    # Original call (commented out for debugging)
+    # await send_email(
+    #     user.email,
+    #     user.username,
+    #     str(request.base_url),
+    #     "reset_password",
+    # )
     return {"message": "Check your email for password reset instructions."}
 
 
